@@ -1,0 +1,63 @@
+.timer-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.timer {
+    display: none;
+    position: relative;
+    font-family: Montserrat;
+    font-weight: bold;
+    color: white;
+    font-size: 4rem;
+}
+
+.timer::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+
+    width: 6rem;
+    aspect-ratio: 1;
+
+    border-radius: 50%;
+    background-color: #183153;
+    z-index: -1;
+}
+
+
+.timer::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+
+    width: 6rem;
+    aspect-ratio: 1;
+
+    border-radius: 50%;
+    background-color: rgba(64, 64, 64, 0.836);
+    z-index: -1;
+    
+
+    animation: timer .5s ease infinite;
+    animation-direction: alternate
+}
+
+@keyframes timer {
+    from  {
+        width: 9rem;
+    }
+
+    to {
+        width: 6rem;
+    }
+}
