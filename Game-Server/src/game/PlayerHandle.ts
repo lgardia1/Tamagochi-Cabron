@@ -42,21 +42,21 @@ export default class PlayerHanlde {
   }
 
   public static movePlayer(id: string, player: PlayerData) {
-    const { gameId  } = player;
+    const { gameId } = player;
     if (gameId === undefined) return;
 
     const game = GameService.getInstance().getGameById(gameId);
-    if (game === undefined || game.state !==  GameStates.PLAYING) return;
+    if (game === undefined || game.state !== GameStates.PLAYING) return;
 
     const currentPlayer = game.room.players.find((p) => p.id === id) as Player;
-    if(currentPlayer.state === PlayerStates.Dead) return;
+    if (currentPlayer.state === PlayerStates.Dead) return;
 
-    const { x, y } = this.calculateNewPosition(currentPlayer, currentPlayer.direction);
-    console.log('X:' + x);
-    console.log('Y:' + y);
-    console.log('Direction:' + currentPlayer.direction);
+    const { x, y } = this.calculateNewPosition(
+      currentPlayer,
+      currentPlayer.direction
+    );
 
-    if (this.isOccupied(x, y, game.room.players)) return;
+    if (this.isOccupied(x, y, game.room.players) !== undefined) return;
     if (this.isOutOfBounds(x, y, game.board)) return;
 
     currentPlayer.x = x;
@@ -70,7 +70,8 @@ export default class PlayerHanlde {
       {
         id: currentPlayer.id,
         x: currentPlayer.x,
-        y: currentPlayer.y
+        y: currentPlayer.y,
+        visibility: currentPlayer.visibility,
       }
     );
   }
@@ -80,11 +81,11 @@ export default class PlayerHanlde {
     if (gameId === undefined) return;
 
     const game = GameService.getInstance().getGameById(gameId);
-    if (game === undefined || game.state !==  GameStates.PLAYING) return;
+    if (game === undefined || game.state !== GameStates.PLAYING) return;
 
     const currentPlayer = game.room.players.find((p) => p.id === id) as Player;
-    if(currentPlayer.state === PlayerStates.Dead) return;
-    
+    if (currentPlayer.state === PlayerStates.Dead) return;
+
     const direction = this.changeDirection(currentPlayer.direction);
     currentPlayer.direction = direction;
 
@@ -93,16 +94,55 @@ export default class PlayerHanlde {
       Messages.ROTATE_PLAYER,
       {
         id: id,
-        direction: currentPlayer.direction
+        direction: currentPlayer.direction,
       }
     );
   }
 
   public static shootPlayer(id: string, player: PlayerData) {
-  }
+    const { gameId } = player;
+    if (gameId === undefined) return;
 
-  public static diePlayer(id: string, player: PlayerData) {
+    const game = GameService.getInstance().getGameById(gameId);
+    if (game === undefined || game.state !== GameStates.PLAYING) return;
 
+    const currentPlayer = game.room.players.find((p) => p.id === id) as Player;
+    if (currentPlayer.state === PlayerStates.Dead || currentPlayer.visibility === false) return;
+
+    const { x, y } = this.calculateNewPosition(
+      currentPlayer,
+      currentPlayer.direction
+    );
+
+    const isOccupied = this.isOccupied(x, y, game.room.players);
+    if (isOccupied === undefined) return;
+
+    isOccupied.state = PlayerStates.Dead;
+
+    ServerService.getInstance().sendMessageToRoom(
+      game.room.name,
+      Messages.DIE_PLAYER,
+      {
+        id: isOccupied.id,
+        idKiller: currentPlayer.id
+      }
+    );
+
+    const alivePlayers = GameService.getInstance().getAlivePlayers(game);
+    if (alivePlayers.length === 1) {
+      ServerService.getInstance().sendMessageToPlayer(
+        alivePlayers[0].id,
+        Messages.WINNER,
+        {}
+      );
+
+      ServerService.getInstance().sendMessageToRoomExceptPlayer(
+        alivePlayers[0].id,
+        game.room.name,
+        Messages.LOOSER,
+        {}
+      );
+    }
   }
 
   /* Funciones Auxiliares */
@@ -129,8 +169,12 @@ export default class PlayerHanlde {
     );
   }
 
-  private static isOccupied(x: number, y: number, players: Player[]): boolean {
-    return players.some((p) => p.x === x && p.y === y);
+  private static isOccupied(
+    x: number,
+    y: number,
+    players: Player[]
+  ): Player | undefined {
+    return players.find((p) => p.x === x && p.y === y);
   }
 
   private static setVisibility(player: Player, board: Board) {
@@ -147,12 +191,12 @@ export default class PlayerHanlde {
   }
 
   private static changeDirection(direction: Directions) {
-    const directionMap =  {
-      [Directions.Up as Directions] :  Directions.Right,
-      [Directions.Right as Directions] :  Directions.Down,
-      [Directions.Down as Directions] :  Directions.Left,
-      [Directions.Left as Directions] :  Directions.Up,
-    }
+    const directionMap = {
+      [Directions.Up as Directions]: Directions.Left,
+      [Directions.Left as Directions]: Directions.Down,
+      [Directions.Down as Directions]: Directions.Right,
+      [Directions.Right as Directions]: Directions.Up,
+    };
 
     return directionMap[direction];
   }

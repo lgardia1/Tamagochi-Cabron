@@ -18,7 +18,8 @@ export class ServerService {
   public actionList: Record<string, (socket : Socket , data?: any) => void> = {
     "SEARCH_GAME": this.do_SearchGame,
     "MOVE_PLAYER": this.do_movePlayer,
-    "ROTATE_PLAYER" : this.do_rotatePlayer
+    "ROTATE_PLAYER" : this.do_rotatePlayer,
+    "SHOOT_PLAYER": this.do_shootPlayer
   };
   
 
@@ -156,6 +157,10 @@ export class ServerService {
 
   private do_rotatePlayer(socket: Socket,data: PlayerData) {
     PlayerHanlde.rotatePlayer(socket.id, data);
+  }
+
+  private do_shootPlayer(socket: Socket,data: PlayerData) {
+    PlayerHanlde.shootPlayer(socket.id, data);
   }
 
   /*   private doMovePlayer(socket: Socket, data: any) {

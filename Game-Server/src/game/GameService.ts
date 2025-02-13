@@ -143,7 +143,7 @@ export class GameService {
 
     const alivePeople = this.getAlivePlayers(game);
 
-    if(alivePeople === 1 && game.state === GameStates.PLAYING){
+    if(alivePeople.length === 1 && game.state === GameStates.PLAYING){
       ServerService.getInstance().sendMessageToRoom(
         game.room.name,
         Messages.WINNER,
@@ -158,7 +158,7 @@ export class GameService {
         game.state = GameStates.WAITING;
     }
 
-    if(game.room.occupied === true) {
+    if(game.room.occupied && game.state !== GameStates.PLAYING) {
       game.room.occupied = false;
     }
   }
@@ -171,10 +171,10 @@ export class GameService {
     }
   }
 
-  private getAlivePlayers(game: Game) {
+  public getAlivePlayers(game: Game): Array<Player> {
     return game.room.players.filter(
       (player) => player.state !== PlayerStates.Dead
-    ).length;
+    );
   }
 
   public getGameById(gameId: string): Game | undefined {
