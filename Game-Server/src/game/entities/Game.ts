@@ -2,11 +2,11 @@ import { Room } from "../../room/entities/Room";
 import { Board } from "./Board";
 
 export enum GameStates {
-    WAITING, PLAYING,
+    WAITING, PLAYING, COUNT_DOWN
 }
 
 export enum GameConf {
-    COUNT_DOWN = 10,
+    COUNT_DOWN = 5,
 }
 
 export enum Messages {
@@ -17,7 +17,8 @@ export enum Messages {
     START_COUNT_DOWN = "START_COUNT_DOWN",
     START_GAME = "START_GAME",
     WINNER = "WINNER",
-    DISCONNECTED_PLAYER = "DISCONNECTED_PLAYER"
+    DISCONNECTED_PLAYER = "DISCONNECTED_PLAYER",
+    ROTATE_PLAYER = "ROTATE_PLAYER"
 }
 
 export interface Game {

@@ -32,6 +32,7 @@ export default class GameScene extends Phaser.Scene {
     this.currentPlayer = null;
     this.players = [];
     this.bushes = [];
+    this.buttons = [];
 
     UI.toogleSpinner();
     this.setUpConnectionHandler();
@@ -106,8 +107,6 @@ export default class GameScene extends Phaser.Scene {
   addPlayer(...players) {
     players.forEach((player) => {
       const p = this.buildPlayer(player);
-      console.log(p);
-      p.setDirty();
       this.setAnimation(p);
       this.players.push(p);
     });
@@ -129,32 +128,43 @@ export default class GameScene extends Phaser.Scene {
   }
 
   removePlayer({ id }) {
-    const playerFound = this.players.findIndex((player) => player.id === id)
+    const playerFound = this.players.findIndex((player) => player.id === id);
     this.players[playerFound].destroy();
     this.players.splice(playerFound, 1);
   }
 
-  setupButtons() {
+  setupButtons(gameService) {
     const { cellSize, height, scale } = Config;
-    new Button(
-      this,
-      cellSize / 2,
-      height - cellSize / 2 - 50,
-      "buttonsSprite",
-      16,
-      scale.BUTTON,
-      () => this.currentPlayer.move()
-    ).setScrollFactor(0);
+    console.log(gameService);
+    this.buttons.push(
+      new Button(
+        this,
+        cellSize / 2,
+        height - cellSize / 2 - 50,
+        "buttonsSprite",
+        16,
+        scale.BUTTON,
+        () => gameService.move()
+      )
+    );
 
-    new Button(
-      this,
-      cellSize / 2 + 100,
-      height - cellSize / 2 - 50,
-      "buttonsSprite",
-      49,
-      scale.BUTTON,
-      () => this.currentPlayer.rotate()
-    ).setScrollFactor(0);
+    this.buttons.push(
+      new Button(
+        this,
+        cellSize / 2 + 100,
+        height - cellSize / 2 - 50,
+        "buttonsSprite",
+        49,
+        scale.BUTTON,
+        () => gameService.rotate()
+      )
+    );
+  }
+
+  setButtonsIntercative() {
+    this.buttons.forEach((button) => {
+      button.setInteractive();
+    });
   }
 
   setAnimation(player) {
@@ -181,6 +191,30 @@ export default class GameScene extends Phaser.Scene {
     this.cameras.main.scrollX = this.width / 2;
     this.cameras.main.scrollY = this.width / 2;
     this.cameras.main.startFollow(this.currentPlayer);
+  }
+
+  resetGame() {
+    this.scene.restart();
+  }
+
+  rotatePlayer({ id, direction }) {
+    this.players.forEach((player) => {
+      if (player.id === id) {
+        console.log("Esta es la direccion: ");
+        player.setDirection(direction);
+        return;
+      }
+    });
+  }
+
+  movePlayer({ id, x, y }) {
+    this.players.forEach((player) => {
+      if (player.id === id) {
+        console.log("Esta es la direccion: ");
+        player.setPositionMove(x , y);
+        return;
+      }
+    });
   }
 
   update() {}

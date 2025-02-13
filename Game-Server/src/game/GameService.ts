@@ -98,8 +98,11 @@ export class GameService {
         time: GameConf.COUNT_DOWN,
       }
     );
+
+    room.game.state = GameStates.COUNT_DOWN;
+
     setTimeout(() => {
-      if (room.game === null) return;
+      if (room.game === null || room.game.state !== GameStates.COUNT_DOWN) return;
 
       room.game.state = GameStates.PLAYING;
       ServerService.getInstance().sendMessageToRoom(
@@ -148,6 +151,15 @@ export class GameService {
       );
       RoomService.getInstance().removeRoom(game.room);
       this.endGame(game);
+      return;
+    }
+
+    if(game.state === GameStates.COUNT_DOWN) {
+        game.state = GameStates.WAITING;
+    }
+
+    if(game.room.occupied === true) {
+      game.room.occupied = false;
     }
   }
 

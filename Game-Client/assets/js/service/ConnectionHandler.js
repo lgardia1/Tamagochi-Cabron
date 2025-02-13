@@ -4,7 +4,7 @@ const ConnectionHandler = {
   connected: false,
   socket: null,
   url: null,
-  gameService: new GameService(),
+  gameService: null,
   init: (url, onConnectedCallBack, onDisconnectedCallBack) => {
     let { socket } = ConnectionHandler;
 
@@ -14,6 +14,7 @@ const ConnectionHandler = {
       console.error(err);
       return
     }
+    ConnectionHandler.gameService =  new GameService(socket);
 
     socket.onAny((eventName, data) => {
       console.log(`Evento: ${eventName}`);

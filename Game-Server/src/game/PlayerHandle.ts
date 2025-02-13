@@ -42,16 +42,19 @@ export default class PlayerHanlde {
   }
 
   public static movePlayer(id: string, player: PlayerData) {
-    const { gameId, direction } = player;
-    if (gameId === undefined || direction === undefined) return;
+    const { gameId  } = player;
+    if (gameId === undefined) return;
 
     const game = GameService.getInstance().getGameById(gameId);
-    if (game === undefined || game.state ===  GameStates.WAITING) return;
+    if (game === undefined || game.state !==  GameStates.PLAYING) return;
 
     const currentPlayer = game.room.players.find((p) => p.id === id) as Player;
-    if (!this.checkPlayer(currentPlayer, direction)) return;
+    if(currentPlayer.state === PlayerStates.Dead) return;
 
-    const { x, y } = this.calculateNewPosition(currentPlayer, direction);
+    const { x, y } = this.calculateNewPosition(currentPlayer, currentPlayer.direction);
+    console.log('X:' + x);
+    console.log('Y:' + y);
+    console.log('Direction:' + currentPlayer.direction);
 
     if (this.isOccupied(x, y, game.room.players)) return;
     if (this.isOutOfBounds(x, y, game.board)) return;
@@ -64,7 +67,34 @@ export default class PlayerHanlde {
     ServerService.getInstance().sendMessageToRoom(
       game.room.name,
       Messages.MOVE_PLAYER,
-      currentPlayer
+      {
+        id: currentPlayer.id,
+        x: currentPlayer.x,
+        y: currentPlayer.y
+      }
+    );
+  }
+
+  public static rotatePlayer(id: string, player: PlayerData) {
+    const { gameId } = player;
+    if (gameId === undefined) return;
+
+    const game = GameService.getInstance().getGameById(gameId);
+    if (game === undefined || game.state !==  GameStates.PLAYING) return;
+
+    const currentPlayer = game.room.players.find((p) => p.id === id) as Player;
+    if(currentPlayer.state === PlayerStates.Dead) return;
+    
+    const direction = this.changeDirection(currentPlayer.direction);
+    currentPlayer.direction = direction;
+
+    ServerService.getInstance().sendMessageToRoom(
+      game.room.name,
+      Messages.ROTATE_PLAYER,
+      {
+        id: id,
+        direction: currentPlayer.direction
+      }
     );
   }
 
@@ -76,10 +106,6 @@ export default class PlayerHanlde {
   }
 
   /* Funciones Auxiliares */
-  private static checkPlayer(player: Player, direction: Directions): boolean {
-    return player.state !== PlayerStates.Dead && player.direction === direction;
-  }
-
   private static calculateNewPosition(
     player: Player,
     direction: Directions
@@ -118,5 +144,16 @@ export default class PlayerHanlde {
         player.visibility = false;
       }
     });
+  }
+
+  private static changeDirection(direction: Directions) {
+    const directionMap =  {
+      [Directions.Up as Directions] :  Directions.Right,
+      [Directions.Right as Directions] :  Directions.Down,
+      [Directions.Down as Directions] :  Directions.Left,
+      [Directions.Left as Directions] :  Directions.Up,
+    }
+
+    return directionMap[direction];
   }
 }

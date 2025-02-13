@@ -1,10 +1,10 @@
 import { Socket } from "socket.io";
 
 export enum Directions {
-    Up = "up", 
-    Down = "down",
-    Left = "left",
-    Right = "right",
+    Up = "Up", 
+    Down = "Down",
+    Left = "Left",
+    Right = "Right",
 }
 
 export enum PlayerStates {

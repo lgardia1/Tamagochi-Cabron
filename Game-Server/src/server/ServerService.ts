@@ -18,6 +18,7 @@ export class ServerService {
   public actionList: Record<string, (socket : Socket , data?: any) => void> = {
     "SEARCH_GAME": this.do_SearchGame,
     "MOVE_PLAYER": this.do_movePlayer,
+    "ROTATE_PLAYER" : this.do_rotatePlayer
   };
   
 
@@ -54,7 +55,7 @@ export class ServerService {
       socket.on("message", (data) => {
         const doType = this.actionList[data.type];
         if (doType !== undefined) {
-          doType(socket, data);
+          doType(socket, data.content);
         }
       });
 
@@ -78,7 +79,7 @@ export class ServerService {
     content: any
   ) {
     console.log("------------------------");
-    console.log("Enviando un mensaje a un jugador:");
+    console.log("Enviando un mensaje a una sala:");
     console.log(`Tipo: ${type.toString()}`);
 
     console.log(`Contenido: ${JSON.stringify(content, null, 2)}`);
@@ -149,7 +150,12 @@ export class ServerService {
   }
 
   private do_movePlayer(socket: Socket, data: PlayerData) {
+    console.log(data)
     PlayerHanlde.movePlayer(socket.id, data);
+  }
+
+  private do_rotatePlayer(socket: Socket,data: PlayerData) {
+    PlayerHanlde.rotatePlayer(socket.id, data);
   }
 
   /*   private doMovePlayer(socket: Socket, data: any) {

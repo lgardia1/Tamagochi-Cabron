@@ -13,20 +13,22 @@ export default class UI {
 
   static timerStartGame(timeStart, callBack) {
     const timerElement = document.getElementById("timer");
-    let time = 10;
+    let time = timeStart;
     timerElement.textContent = time;
     timerElement.style.display = 'block';
   
-    const timer = setInterval(() => {
+    const timerInterval = setInterval(() => {
       time--;
       timerElement.textContent =  time;
     }, 1000);
     
   
-    setTimeout(() => {
-      clearInterval(timer);
+    const  timerTimeout  =setTimeout(() => {
+      clearInterval(timerInterval);
       timerElement.style.display = 'none';
-      callBack()
+      callBack();
     }, timeStart * 1000);
+    
+    return { timerInterval ,  timerTimeout};
   }
 }

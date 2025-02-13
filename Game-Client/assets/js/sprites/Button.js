@@ -3,12 +3,12 @@ export default class Button extends Phaser.GameObjects.Sprite {
       super(scene, x, y, spriteKey, frame);  
       scene.add.existing(this);              
       this.setOrigin(0, 0);                   
-      this.setScale(scale);                  
-      this.setInteractive();  
+      this.setScale(scale);                   
       this.setFrame(frame);                
-  
+      this.setScrollFactor(0)
+      this.setDepth(4);
       
-      this.on('pointerdown', onClickCallback); 
+      this.on('pointerdown', () => {onClickCallback()}); 
   
       
       this.on('pointerover', () => {

@@ -1,68 +1,108 @@
-import { GameStatus , Direction }  from "../util/GameConstants.js";
+import { GameStatus, Direction, Message } from "../util/GameConstants.js";
 import UI from "../ui/UI.js";
 
 export default class GameService {
-    #actionsList = {
-        "JOIN_GAME" : this.do_joinGame.bind(this),
-        "NEW_PLAYER" : this.do_newPlayer.bind(this),
-        "CHANGE_DIRECTION" : this.do_direction.bind(this),
-        "MOVE_PLAYER" : this.do_move.bind(this),
-        "START_GAME" : this.do_gameStart.bind(this),
-        "WINNER" : this.do_winner.bind(this),
-        "LOOSER": this.do_looser.bind(this),
-        "START_COUNT_DOWN": this.do_startCountDown.bind(this),
-        "DISCONNECTED_PLAYER" : this.do_disconnectedPlayer.bind(this)
-    };
+  #actionsList = {
+    JOIN_GAME: this.do_joinGame.bind(this),
+    NEW_PLAYER: this.do_newPlayer.bind(this),
+    ROTATE_PLAYER: this.do_rotatePlayer.bind(this),
+    MOVE_PLAYER: this.do_movePlayer.bind(this),
+    START_GAME: this.do_gameStart.bind(this),
+    WINNER: this.do_winner.bind(this),
+    LOOSER: this.do_looser.bind(this),
+    START_COUNT_DOWN: this.do_startCountDown.bind(this),
+    DISCONNECTED_PLAYER: this.do_disconnectedPlayer.bind(this),
+  };
 
-    #state = null;
+  #state = null;
+  #timerId = null;
+  #socket = null;
 
-    constructor(){
-        this.#state = GameStatus.WAITING;
+  constructor(socket) {
+    this.#socket = socket;
+    this.#state = GameStatus.WAITING;
+    this.#timerId = null;
+  }
+
+  async do(data) {
+    this.#actionsList[data.type](data.content);
+  }
+
+  do_joinGame({ gameId, board, player: currentPlayer, players }) {
+    // Screen
+    this.scene.setBoard(board);
+    this.scene.setupButtons(this);
+    
+    // Player
+    this.scene.createAnimations();
+    this.scene.setCurrentPlayer(currentPlayer, gameId);
+    this.scene.addPlayer(...players);
+  }
+
+  do_newPlayer(player) {
+    this.scene.addPlayer(player);
+  }
+
+
+  do_disconnectedPlayer(player) {
+    this.scene.removePlayer(player);
+
+    if (this.#state !== GameStatus.COUNTDOWN) {
+      return;
     }
-
-    async do (data) {
-        this.#actionsList[data.type](data.content)
+  
+    this.#state = GameStatus.WAITING;
+    UI.toogleSpinner();
+  
+    if (this.#timerId !== null) {
+      clearTimeout(this.#timerId.timerTimeout);
+      clearInterval(this.#timerId.timerInterval);
+  
+      const timerElement = document.getElementById("timer");
+      if (timerElement) {
+        timerElement.textContent = "0";
+        timerElement.style.display = "none";
+      }
     }
+  }
 
-    do_joinGame({gameId, board, player: currentPlayer, players}) {
-        this.scene.createAnimations();
-        this.scene.setBoard(board);
-        this.scene.setCurrentPlayer(currentPlayer, gameId);
-        this.scene.addPlayer(players);
-    }
+  do_startCountDown({ time }) {
+    UI.toogleSpinner();
 
-    do_newPlayer (player) {
-        this.scene.addPlayer(player);
-    }
+    this.#state = GameStatus.COUNTDOWN;
+    this.#timerId = UI.timerStartGame(time, () => {});
+  }
 
-    do_direction({id , direction}) {
+  do_gameStart() {
+    this.#state = GameStatus.PLAYING;
+    this.scene.setUpCamera();
+    this.scene.setButtonsIntercative();
+  }
 
-    }
+  do_winner() {
+    this.scene.resetGame();
+  }
 
-    do_disconnectedPlayer(player) {
-        this.scene.removePlayer(player);
-    }
+  do_looser() {
+    this.scene.resetGame();
+  }
 
-    do_startCountDown({time}) {
-        UI.toogleSpinner();
-        UI.timerStartGame(time, () => {
-            this.scene.setUpCamera()
-        });
-    }
+  move() {
+    const { gameId } = this.scene.currentPlayer;
+    this.#socket.emit('message', { type: Message.MOVE_PLAYER, content: { gameId } });
+  }
 
-    do_move({id , x , y}) {
+  rotate() {
+    const { gameId  } = this.scene.currentPlayer;
+    this.#socket.emit('message', { type: Message.ROTATE_PLAYER, content: { gameId  }});
+  }
 
-    }
+  do_rotatePlayer(player) {
+    this.scene.rotatePlayer(player);
+  }
 
-    do_gameStart() {
-        this.#state = GameStatus.PLAYING;
-    }
+  do_movePlayer(player) {
+    this.scene.movePlayer(player);
+  }
 
-    do_winner() {
-
-    }
-
-    do_looser() {
-
-    }
 }
