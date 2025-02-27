@@ -8,15 +8,13 @@ export const Direction = {
 export const Message = {
   "SEARCH_GAME" : "SEARCH_GAME",
   "MOVE_PLAYER" : "MOVE_PLAYER",
-  "ROTATE_PLAYER" : "ROTATE_PLAYER"
+  "ROTATE_PLAYER" : "ROTATE_PLAYER",
+  "SHOOT_PLAYER" : "SHOOT_PLAYER"
 }
 
 export const PlayerStatus = {
-  NO_CONNECTED: 0,
-  CONNECTED: 1,
-  MOVING: 3,
-  IDLE: 2,
-  DIE: 4,
+  LIVE: 0,
+  DIE: 1,
 };
 
 export const GameStatus = {
@@ -25,3 +23,4 @@ export const GameStatus = {
   PLAYING: 2,
   ENDED: 3,
 };
+

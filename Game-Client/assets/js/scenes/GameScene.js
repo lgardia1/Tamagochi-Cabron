@@ -136,6 +136,7 @@ export default class GameScene extends Phaser.Scene {
   setupButtons(gameService) {
     const { cellSize, height, scale } = Config;
     console.log(gameService);
+
     this.buttons.push(
       new Button(
         this,
@@ -159,11 +160,30 @@ export default class GameScene extends Phaser.Scene {
         () => gameService.rotate()
       )
     );
+
+    const shootButton = new Button(
+      this,
+      cellSize / 2 + 200,
+      height - cellSize / 2 - 50,
+      "buttonsSprite",
+      1,
+      scale.BUTTON,
+      () => gameService.shoot()
+    );
+
+    this.buttons.push(shootButton);
+    this.shootButton = shootButton;
   }
 
   setButtonsIntercative() {
     this.buttons.forEach((button) => {
       button.setInteractive();
+    });
+  }
+
+  setButtonsdisableInteractive() {
+    this.buttons.forEach((button) => {
+      button.disableInteractive();
     });
   }
 
@@ -207,11 +227,38 @@ export default class GameScene extends Phaser.Scene {
     });
   }
 
-  movePlayer({ id, x, y }) {
+  movePlayer({ id, x, y, visibility }) {
     this.players.forEach((player) => {
       if (player.id === id) {
-        console.log("Esta es la direccion: ");
-        player.setPositionMove(x , y);
+        player.setPositionMove(x, y);
+        if (this.currentPlayer.id !== id) {
+          player.setVisible(visibility);
+          return;
+        }
+        if (visibility) {
+          this.shootButton.setInteractive();
+          return;
+        }
+        this.shootButton.disableInteractive();
+        return;
+      }
+    });
+  }
+
+  diePlayer({ id, idKiller }) {
+    this.players.forEach((player) => {
+      if (player.id === id) {
+        player.die();
+
+        if (id === this.currentPlayer.id) {
+          this.setButtonsdisableInteractive();
+          this.players.forEach((player) => {
+            if (player.id === idKiller) {
+              this.cameras.main.startFollow(player);
+              return;
+            }
+          });
+        }
         return;
       }
     });

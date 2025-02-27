@@ -12,6 +12,7 @@ export default class GameService {
     LOOSER: this.do_looser.bind(this),
     START_COUNT_DOWN: this.do_startCountDown.bind(this),
     DISCONNECTED_PLAYER: this.do_disconnectedPlayer.bind(this),
+    DIE_PLAYER: this.do_diePLayer.bind(this)
   };
 
   #state = null;
@@ -32,7 +33,7 @@ export default class GameService {
     // Screen
     this.scene.setBoard(board);
     this.scene.setupButtons(this);
-    
+
     // Player
     this.scene.createAnimations();
     this.scene.setCurrentPlayer(currentPlayer, gameId);
@@ -43,21 +44,20 @@ export default class GameService {
     this.scene.addPlayer(player);
   }
 
-
   do_disconnectedPlayer(player) {
     this.scene.removePlayer(player);
 
     if (this.#state !== GameStatus.COUNTDOWN) {
       return;
     }
-  
+
     this.#state = GameStatus.WAITING;
     UI.toogleSpinner();
-  
+
     if (this.#timerId !== null) {
       clearTimeout(this.#timerId.timerTimeout);
       clearInterval(this.#timerId.timerInterval);
-  
+
       const timerElement = document.getElementById("timer");
       if (timerElement) {
         timerElement.textContent = "0";
@@ -89,12 +89,26 @@ export default class GameService {
 
   move() {
     const { gameId } = this.scene.currentPlayer;
-    this.#socket.emit('message', { type: Message.MOVE_PLAYER, content: { gameId } });
+    this.#socket.emit("message", {
+      type: Message.MOVE_PLAYER,
+      content: { gameId },
+    });
   }
 
   rotate() {
-    const { gameId  } = this.scene.currentPlayer;
-    this.#socket.emit('message', { type: Message.ROTATE_PLAYER, content: { gameId  }});
+    const { gameId } = this.scene.currentPlayer;
+    this.#socket.emit("message", {
+      type: Message.ROTATE_PLAYER,
+      content: { gameId },
+    });
+  }
+
+  shoot() {
+    const { gameId } = this.scene.currentPlayer;
+    this.#socket.emit("message", {
+      type: Message.SHOOT_PLAYER,
+      content: { gameId },
+    });
   }
 
   do_rotatePlayer(player) {
@@ -105,4 +119,7 @@ export default class GameService {
     this.scene.movePlayer(player);
   }
 
+  do_diePLayer(player) {
+    this.scene.diePlayer(player);
+  }
 }

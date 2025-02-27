@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { Game } from "../../game/entities/Game";
 
 export enum Directions {
     Up = "Up", 
@@ -27,4 +28,9 @@ export interface PlayerData {
     y?: number;
     direction?: Directions;
     visibility?: boolean;
+}
+
+export interface PlayerGameInfo {
+    currentPlayer: Player;
+    game: Game;
 }

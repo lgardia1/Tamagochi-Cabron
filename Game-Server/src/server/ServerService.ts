@@ -151,7 +151,6 @@ export class ServerService {
   }
 
   private do_movePlayer(socket: Socket, data: PlayerData) {
-    console.log(data)
     PlayerHanlde.movePlayer(socket.id, data);
   }
 

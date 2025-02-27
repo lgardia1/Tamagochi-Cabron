@@ -1,4 +1,3 @@
-import Button from "../objects/Button.js";
 import Config from "../config/config.js";
 
 export default class MenuScene extends Phaser.Scene {

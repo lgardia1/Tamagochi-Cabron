@@ -1,5 +1,5 @@
 import GameScene from "./scenes/GameScene.js";
-/* import MenuScene from "./scenes/MenuScene.js"; */
+import MenuScene from "./scenes/MenuScene.js"; 
 import Config from "./config/config.js";
 import Color from "./util/Color.js";
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         gravity: { y: 0 },
       },
     },
-    scene: GameScene,
+    scene: [MenuScene, GameScene, ],
   };
   
   var game = new Phaser.Game(config);

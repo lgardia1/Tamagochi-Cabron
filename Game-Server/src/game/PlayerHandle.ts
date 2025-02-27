@@ -115,7 +115,7 @@ export default class PlayerHanlde {
     );
 
     const isOccupied = this.isOccupied(x, y, game.room.players);
-    if (isOccupied === undefined) return;
+    if (isOccupied === undefined || isOccupied.visibility === false) return;
 
     isOccupied.state = PlayerStates.Dead;
 
