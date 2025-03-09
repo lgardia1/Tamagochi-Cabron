@@ -319,12 +319,14 @@ export default class GameScene extends Phaser.Scene {
       "bullets",
       1.5,
       this.currentPlayer.direction,
-      300
+      430
     ).anims
       .play("animate-bullets")
       .setDepth(5);
-
-    this.bullets.push(bullet);
+    
+    setTimeout(()=>{
+      bullet.destroy();
+    }, 200)
   }
 
   diePlayer({ id, idKiller }) {
@@ -514,16 +516,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update() {
-    const { cellSize } = Config;
-  
-   this.bullets.forEach((bullet, index) => {
-      if (
-        Math.abs(bullet.originX - bullet.x) > cellSize * 100 ||
-        Math.abs(bullet.originY - bullet.y) > cellSize * 100
-      ) {
-        this.bullets.splice(index, 1);
-        bullet.destroy(); 
-      }
-    }); 
+ 
   }  
 }
