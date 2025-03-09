@@ -4,6 +4,7 @@ necesitaras tener el puerto 3000 abierto y al menos 2 amigos disponibles.
 
 # Como usarlo
 
+```
 Tamagochi Cabron/
 │
 ├── Game-Client/
@@ -19,6 +20,7 @@ Tamagochi Cabron/
 │   └── package.json
 │ 
 └── .gitignore
+```
 
 En `Game'Client` deberemos de inciar un servidor (*opcion: Visual Studio>**Live Server***)
 
