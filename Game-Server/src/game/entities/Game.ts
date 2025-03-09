@@ -9,12 +9,13 @@ export enum GameStates {
 }
 
 export const GameConf = {
-    COUNT_DOWN: parseArrayEnv(process.env.COUNT_DOWN, 5) as number,
-    START_TORMENT:  parseArrayEnv(process.env.START_TORMENT, 10) as number,
-    SPEED_TORMENT: parseArrayEnv(process.env.SPEED_TORMENT, 1) as number,
-    TORMENT: parseArrayEnv(process.env.TORMENT, 'true') as string,
-    TIME_TO_DIE_TORMENT: parseArrayEnv(process.env.TIME_TO_DIE_TORMENT, 2) as number,
+    get COUNT_DOWN() { return parseArrayEnv(process.env.COUNT_DOWN, 5) as number; },
+    get START_TORMENT() { return parseArrayEnv(process.env.START_TORMENT, 10) as number; },
+    get SPEED_TORMENT() { return parseArrayEnv(process.env.SPEED_TORMENT, 1) as number; },
+    get TORMENT() { return parseArrayEnv(process.env.TORMENT, 'true') as string; },
+    get TIME_TO_DIE_TORMENT() { return parseArrayEnv(process.env.TIME_TO_DIE_TORMENT, 2) as number; }
 };
+
 
 export enum Messages {
     CURRENT_PLAYER = "CURRENT_PLAYER",
