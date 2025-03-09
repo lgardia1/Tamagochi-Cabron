@@ -70,12 +70,12 @@ Asegurate de tener descargado [node](https://nodejs.org/es/download)
 
 
 ## Tableros con difenentes tamaños:
-[imagen1](1.PNG)
+![imagen1](1.PNG)
 
-[imagen2](2.PNG)
+![imagen2](2.PNG)
 
 ## HTTPS:
-[imagen3](3.PNG)
+![imagen3](3.PNG)
 
 
 ## Personalizacion
