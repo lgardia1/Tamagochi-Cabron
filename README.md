@@ -52,7 +52,7 @@ Asegurate de tener descargado [node](https://nodejs.org/es/download)
 - Representación visual dinámica del tablero y los jugadores según datos del servidor.
 - Implementación de eventos de juego: desplazamiento, rotación y disparo.
 - Diseño de una interfaz intuitiva para la interacción del jugador.
-- (5 pts) Adaptabilidad del cliente a posibles rediseños o mejoras futuras.
+- Adaptabilidad del cliente a posibles rediseños o mejoras futuras.
 
 ### 4. Gestión de Salas y Control de Juego
 - Implementación de salas para gestionar partidas independientes.
