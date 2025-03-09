@@ -1,4 +1,4 @@
-import { Board } from "./entities/Board";
+import { Board, BoardConf } from "./entities/Board";
 
 export class BoardBuilder {
   private board: Board;
@@ -6,38 +6,69 @@ export class BoardBuilder {
   constructor() {
     this.board = {
       dimensions: {
-        width: 10,
-        height: 10,
+        width: BoardConf.WIDTH,
+        height: BoardConf.HEIGHT,
       },
-      bushes: [],
+      bushes: []
     };
 
-    this.board.bushes = this.generateBushes(10, 10, 8);
+    this.board.bushes = this.generateBushes(
+      this.board.dimensions.width,
+      this.board.dimensions.height,
+      BoardConf.NUM_BUSH
+    );
   }
 
   private generateBushes(boardWidth: number, boardHeight: number, bushCount: number): { x: number; y: number }[] {
     const bushes: { x: number; y: number }[] = [];
-    const map: number[][] = Array.from({ length: boardHeight }, () => Array(boardWidth).fill(0));
-
-    const isValidPosition = (x: number, y: number): boolean => {
-      if (x === 0 || y === 0 || x === boardWidth - 1 || y === boardHeight - 1) return false;
-      for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-          if (map[y + dy]?.[x + dx] === 5) return false;
-        }
-      }
-      return true;
-    };
-
-    while (bushes.length < bushCount) {
-      const x = Math.floor(Math.random() * (boardWidth - 2)) + 1;
-      const y = Math.floor(Math.random() * (boardHeight - 2)) + 1;
-
-      if (isValidPosition(x, y)) {
-        map[y][x] = 5;
-        bushes.push({ x, y });
+    
+   
+    let validPositions: { x: number; y: number }[] = [];
+    for (let y = 1; y < boardHeight - 1; y++) {
+      for (let x = 1; x < boardWidth - 1; x++) {
+        validPositions.push({ x, y });
       }
     }
+
+  
+    validPositions = validPositions.sort(() => Math.random() - 0.5);
+
+   // Calculo aproximado de numero maximo de arbustos que pueden caber en el tablero
+    const maxPossible = Math.floor(validPositions.length / 5);
+    bushCount = Math.min(bushCount, maxPossible);
+
+   
+    while (bushes.length < bushCount && validPositions.length > 0) {
+      const index = Math.floor(Math.random() * validPositions.length);
+      const position = validPositions[index];
+      
+   
+      let isValid = true;
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (bushes.some(b => 
+            b.x === position.x + dx && 
+            b.y === position.y + dy
+          )) {
+            isValid = false;
+            break;
+          }
+        }
+        if (!isValid) break;
+      }
+
+      if (isValid) {
+        bushes.push(position);
+       
+        validPositions = validPositions.filter(p => 
+          Math.abs(p.x - position.x) > 1 || 
+          Math.abs(p.y - position.y) > 1
+        );
+      } else {
+        validPositions.splice(index, 1);
+      }
+    }
+
     return bushes;
   }
 

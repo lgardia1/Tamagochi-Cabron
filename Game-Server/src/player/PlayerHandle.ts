@@ -4,10 +4,11 @@ import {
   Player,
   PlayerStates,
 } from "../player/entities/Player";
+import { RoomService } from "../room/RoomService";
 import { ServerService } from "../server/ServerService";
-import { Board } from "./entities/Board";
-import { Game, GameStates, Messages } from "./entities/Game";
-import { GameService } from "./GameService";
+import { Board } from "../game/entities/Board";
+import { Game, GameConf, GameStates, Messages } from "../game/entities/Game";
+import { GameService } from "../game/GameService";
 
 export default class PlayerHanlde {
   public static setPlayerInitialPositon(player: Player, game: Game) {
@@ -15,9 +16,9 @@ export default class PlayerHanlde {
 
     const corners = [
       { x: 0, y: 0 },
-      { x: 0, y: board.dimensions.width - 1 },
-      { x: board.dimensions.height - 1, y: 0 },
-      { x: board.dimensions.height - 1, y: board.dimensions.width - 1 },
+      { x: board.dimensions.width - 1, y: 0 },
+      { x: 0, y: board.dimensions.height - 1 },
+      { x: board.dimensions.width - 1, y: board.dimensions.height - 1 },
     ];
 
     let occupied = true;
@@ -26,7 +27,7 @@ export default class PlayerHanlde {
       const index = Math.floor(Math.random() * corners.length);
       const corner = corners[index];
 
-      // Verificar si está ocupado
+      
       const occupied = game.room.players.some(
         (p) => player.id !== p.id && p.x === corner.x && p.y === corner.y
       );
@@ -63,6 +64,22 @@ export default class PlayerHanlde {
     currentPlayer.y = y;
 
     this.setVisibility(currentPlayer, game.board);
+
+
+    if (
+      currentPlayer.tormentTimeOut !== null &&
+      !this.isPlayerPlayerIntoTorment(game, currentPlayer
+      )
+    ) {
+      currentPlayer.state = PlayerStates.Live;
+      clearTimeout(currentPlayer.tormentTimeOut);
+      currentPlayer.tormentTimeOut = null;
+    } else if (
+      currentPlayer.tormentTimeOut === null &&
+      this.isPlayerPlayerIntoTorment(game, currentPlayer)
+    ) {
+      this.setTormentDie(game, currentPlayer);
+    }
 
     ServerService.getInstance().sendMessageToRoom(
       game.room.name,
@@ -107,7 +124,11 @@ export default class PlayerHanlde {
     if (game === undefined || game.state !== GameStates.PLAYING) return;
 
     const currentPlayer = game.room.players.find((p) => p.id === id) as Player;
-    if (currentPlayer.state === PlayerStates.Dead || currentPlayer.visibility === false) return;
+    if (
+      currentPlayer.state === PlayerStates.Dead ||
+      currentPlayer.visibility === false
+    )
+      return;
 
     const { x, y } = this.calculateNewPosition(
       currentPlayer,
@@ -124,25 +145,22 @@ export default class PlayerHanlde {
       Messages.DIE_PLAYER,
       {
         id: isOccupied.id,
-        idKiller: currentPlayer.id
+        idKiller: currentPlayer.id,
       }
     );
 
-    const alivePlayers = GameService.getInstance().getAlivePlayers(game);
-    if (alivePlayers.length === 1) {
-      ServerService.getInstance().sendMessageToPlayer(
-        alivePlayers[0].id,
-        Messages.WINNER,
-        {}
-      );
+    this.setWinner(game);
+  }
 
-      ServerService.getInstance().sendMessageToRoomExceptPlayer(
-        alivePlayers[0].id,
-        game.room.name,
-        Messages.LOOSER,
-        {}
-      );
-    }
+  public static isSomePlayerIntoTorment(game: Game) {
+    const playersInStorm = game.room.players.filter((player: Player) => {
+      return this.isPlayerPlayerIntoTorment(game, player);
+    });
+
+    playersInStorm.forEach((player) => {
+      if (player.state === PlayerStates.IntoTorment) return;
+      this.setTormentDie(game, player);
+    });
   }
 
   /* Funciones Auxiliares */
@@ -199,5 +217,58 @@ export default class PlayerHanlde {
     };
 
     return directionMap[direction];
+  }
+
+  private static setWinner(game: Game) {
+    const alivePlayers = GameService.getInstance().getAlivePlayers(game);
+    if (alivePlayers.length === 1) {
+      ServerService.getInstance().sendMessageToPlayer(
+        alivePlayers[0].id,
+        Messages.WINNER,
+        {}
+      );
+
+      ServerService.getInstance().sendMessageToRoomExceptPlayer(
+        alivePlayers[0].id,
+        game.room.name,
+        Messages.LOOSER,
+        {}
+      );
+
+      RoomService.getInstance().removeRoom(game.room);
+      GameService.getInstance().endGame(game);
+    }
+  }
+
+  public static setTormentDie(game: Game, player: Player) {
+    player.state = PlayerStates.IntoTorment;
+    player.tormentTimeOut = setTimeout(() => {
+      if(player.state !== PlayerStates.IntoTorment) return;
+
+      const alivePlayers = GameService.getInstance().getAlivePlayers(game);
+      if(alivePlayers.length  <= 1) return;
+      ServerService.getInstance().sendMessageToRoom(
+        game.room.name,
+        Messages.DIE_PLAYER_TORMENT,
+        {
+          id: player.id,
+        }
+      );
+      player.state = PlayerStates.Dead;
+
+      this.setWinner(game);
+    }, GameConf.TIME_TO_DIE_TORMENT * 1000);
+  }
+
+  private static isPlayerPlayerIntoTorment(
+    game: Game,
+    currentPlayer: Player
+  ): boolean {
+    return (
+      currentPlayer.x <= game.stormSize ||
+      currentPlayer.x >= game.board.dimensions.width - game.stormSize ||
+      currentPlayer.y <= game.stormSize ||
+      currentPlayer.y >= game.board.dimensions.height - game.stormSize
+    );
   }
 }

@@ -37,7 +37,7 @@ export class RoomService {
     const room: Room = this.getRoom();
     room.players.push(player);
     ServerService.getInstance().addPlayerToRoom(player.id, room.name);
-    if (room.players.length === RoomConfig.maxRoomPlayers) room.occupied = true;
+    if (room.players.length === RoomConfig.MAX_ROOM_PLAYER) room.occupied = true;
     return room;
   }
 

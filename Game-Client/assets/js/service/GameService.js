@@ -1,4 +1,5 @@
 import { GameStatus, Direction, Message } from "../util/GameConstants.js";
+import Config  from '../config/config.js'
 import UI from "../ui/UI.js";
 
 export default class GameService {
@@ -12,7 +13,9 @@ export default class GameService {
     LOOSER: this.do_looser.bind(this),
     START_COUNT_DOWN: this.do_startCountDown.bind(this),
     DISCONNECTED_PLAYER: this.do_disconnectedPlayer.bind(this),
-    DIE_PLAYER: this.do_diePLayer.bind(this)
+    DIE_PLAYER: this.do_diePLayer.bind(this),
+    EXPAND_TORMENT: this.do_expandTormnet.bind(this),
+    DIE_PLAYER_TORMENT: this.do_diePLayerTorment.bind(this),
   };
 
   #state = null;
@@ -32,12 +35,15 @@ export default class GameService {
   do_joinGame({ gameId, board, player: currentPlayer, players }) {
     // Screen
     this.scene.setBoard(board);
-    this.scene.setupButtons(this);
+    Config.dimensions = board.dimensions;
 
     // Player
     this.scene.createAnimations();
     this.scene.setCurrentPlayer(currentPlayer, gameId);
     this.scene.addPlayer(...players);
+
+    // Camera
+    this.scene.setUpCameraPrevisualization(board.dimensions);
   }
 
   do_newPlayer(player) {
@@ -76,18 +82,25 @@ export default class GameService {
   do_gameStart() {
     this.#state = GameStatus.PLAYING;
     this.scene.setUpCamera();
+    this.scene.setupButtons(this);
     this.scene.setButtonsIntercative();
   }
 
+  do_expandTormnet({ stormSize }){
+    this.scene.createStormEffect(stormSize);
+  }
+
   do_winner() {
-    this.scene.resetGame();
+    this.scene.setButtonsdisableInteractive();
+    this.scene.winner();
   }
 
   do_looser() {
-    this.scene.resetGame();
+    this.scene.looser();
   }
 
-  move() {
+  move() { 
+    this.scene.sound.play('move');
     const { gameId } = this.scene.currentPlayer;
     this.#socket.emit("message", {
       type: Message.MOVE_PLAYER,
@@ -104,6 +117,7 @@ export default class GameService {
   }
 
   shoot() {
+    this.scene.shootPlayer();
     const { gameId } = this.scene.currentPlayer;
     this.#socket.emit("message", {
       type: Message.SHOOT_PLAYER,
@@ -121,5 +135,9 @@ export default class GameService {
 
   do_diePLayer(player) {
     this.scene.diePlayer(player);
+  }
+
+  do_diePLayerTorment(player) {
+    this.scene.diePlayerTorment(player);
   }
 }

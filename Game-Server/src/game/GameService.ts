@@ -6,7 +6,7 @@ import { Game, GameConf, GameStates, Messages } from "./entities/Game";
 import { BoardBuilder } from "./BoardBuilder";
 import { ServerService } from "../server/ServerService";
 import { genRanHexId } from "../util/util";
-import PlayerHanlde from "./PlayerHandle";
+import PlayerHanlde from "../player/PlayerHandle";
 
 export class GameService {
   private games: Game[];
@@ -35,6 +35,7 @@ export class GameService {
         Math.floor(Math.random() * directions.length)
       ] as Directions,
       visibility: true,
+      tormentTimeOut: null
     };
   }
 
@@ -82,6 +83,7 @@ export class GameService {
       state: GameStates.WAITING,
       room: room,
       board: new BoardBuilder().getBoard(),
+      stormSize: -1
     };
 
     room.game = game;
@@ -90,7 +92,6 @@ export class GameService {
 
   private startGame(room: Room) {
     if (room.game === null) return;
-
     ServerService.getInstance().sendMessageToRoom(
       room.name,
       Messages.START_COUNT_DOWN,
@@ -102,7 +103,8 @@ export class GameService {
     room.game.state = GameStates.COUNT_DOWN;
 
     setTimeout(() => {
-      if (room.game === null || room.game.state !== GameStates.COUNT_DOWN) return;
+      if (room.game === null || room.game.state !== GameStates.COUNT_DOWN)
+        return;
 
       room.game.state = GameStates.PLAYING;
       ServerService.getInstance().sendMessageToRoom(
@@ -110,7 +112,39 @@ export class GameService {
         Messages.START_GAME,
         {}
       );
+      if (GameConf.TORMENT !== 'false') {
+        this.startTormnet(room.game);
+      }
     }, GameConf.COUNT_DOWN * 1000);
+  }
+
+  private startTormnet(game: Game) {
+    let delay = GameConf.START_TORMENT;
+    let speed = GameConf.SPEED_TORMENT;
+ 
+    let stormSize = 0;
+    const endExpandTorment = Math.floor(
+      Math.min(game.board.dimensions.width, game.board.dimensions.height) / 2
+    );
+
+    const expandStorm = () => {
+      if (stormSize - 1 >= endExpandTorment || game.state === GameStates.ENDED) return;
+
+      game.stormSize =  stormSize;
+      ServerService.getInstance().sendMessageToRoom(
+        game.room.name,
+        Messages.EXPAND_TORMENT,
+        { stormSize }
+      );
+      PlayerHanlde.isSomePlayerIntoTorment(game);
+
+      stormSize++;
+      delay = Math.max(2, (delay * 0.8) / speed);
+
+      setTimeout(expandStorm, delay * 1000);
+    };
+
+    setTimeout(expandStorm, delay * 1000);
   }
 
   public removePlayer(id: string) {
@@ -120,6 +154,11 @@ export class GameService {
       );
 
       if (index !== -1) {
+        const currentPlayer = game.room.players[index];
+        if(currentPlayer.tormentTimeOut !== null) {
+          currentPlayer.state = PlayerStates.Dead;
+          clearTimeout(currentPlayer.tormentTimeOut);
+        }
         ServerService.getInstance().sendMessageToRoom(
           game.room.name,
           Messages.DISCONNECTED_PLAYER,
@@ -143,7 +182,7 @@ export class GameService {
 
     const alivePeople = this.getAlivePlayers(game);
 
-    if(alivePeople.length === 1 && game.state === GameStates.PLAYING){
+    if (alivePeople.length === 1 && game.state === GameStates.PLAYING) {
       ServerService.getInstance().sendMessageToRoom(
         game.room.name,
         Messages.WINNER,
@@ -154,17 +193,18 @@ export class GameService {
       return;
     }
 
-    if(game.state === GameStates.COUNT_DOWN) {
-        game.state = GameStates.WAITING;
+    if (game.state === GameStates.COUNT_DOWN) {
+      game.state = GameStates.WAITING;
     }
 
-    if(game.room.occupied && game.state !== GameStates.PLAYING) {
+    if (game.room.occupied && game.state !== GameStates.PLAYING) {
       game.room.occupied = false;
     }
   }
 
-  private endGame(currentGame: Game) {
+  public endGame(currentGame: Game) {
     const index = this.games.indexOf(currentGame);
+    currentGame.state = GameStates.ENDED;
     if (index >= -1) {
       console.log("Juego Terminado: " + currentGame.id);
       this.games.splice(index, 1);

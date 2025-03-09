@@ -50,11 +50,11 @@ export default class MenuScene extends Phaser.Scene {
 
   setUpListener() {
     this.input.on("pointerdown", () => {
-      this.scene.start("GameScene"); // Cambia a la escena del juego
+      this.scene.start("GameScene"); 
     });
 
     this.input.keyboard.on("keydown-ENTER", () => {
-      this.scene.start("GameScene"); // También inicia con la tecla espacio
+      this.scene.start("GameScene"); 
     });
   }
 }

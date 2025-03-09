@@ -9,7 +9,7 @@ export enum Directions {
 }
 
 export enum PlayerStates {
-    Live, Dead
+    Live, Dead, IntoTorment 
 }
 
 export interface Player {
@@ -19,6 +19,7 @@ export interface Player {
     state: PlayerStates;
     direction: Directions;
     visibility: Boolean;
+    tormentTimeOut: NodeJS.Timeout | null;
 }
 
 

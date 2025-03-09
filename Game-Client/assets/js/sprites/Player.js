@@ -8,25 +8,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     this.setScale(scale);
     this.setRotation(Direction[direction]);
-
     this.id = id;
     this.direction = direction;
     this.visibility = visibility;
     this.state = state;
   }
 
-  getRandomDirection() {
-    const directions = [
-      2 * Math.PI,
-      (3 * Math.PI) / 2,
-      Math.PI,
-      Math.PI / 2,
-      0,
-    ];
-    return directions[Math.floor(Math.random() * directions.length)];
-  }
-
   setDirection(direction) {
+    this.direction = direction;
     this.setRotation(Direction[direction]);
   }
 

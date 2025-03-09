@@ -1,8 +1,7 @@
 import { DefaultEventsMap, Server, Socket } from "socket.io";
 import http from "http";
 import { GameService } from "../game/GameService";
-import { AnyTxtRecord } from "dns";
-import PlayerHanlde from "../game/PlayerHandle";
+import PlayerHanlde from "../player/PlayerHandle";
 import { PlayerData } from "../player/entities/Player";
 
 export class ServerService {
@@ -12,8 +11,6 @@ export class ServerService {
     DefaultEventsMap,
     any
   > | null;
-
-
 
   public actionList: Record<string, (socket : Socket , data?: any) => void> = {
     "SEARCH_GAME": this.do_SearchGame,
@@ -46,7 +43,7 @@ export class ServerService {
       cors: {
         origin: "*",
         methods: ["GET", "POST"],
-      },
+      }
     });
 
     this.io.on("connection", (socket) => {
@@ -139,11 +136,6 @@ export class ServerService {
     });
   }
 
-  public gameStartMessage() {
-
-
-  }
-
   private do_SearchGame(socket: Socket) {
     GameService.getInstance().addPlayer(
       GameService.getInstance().buildPlayer(socket.id)
@@ -161,12 +153,4 @@ export class ServerService {
   private do_shootPlayer(socket: Socket,data: PlayerData) {
     PlayerHanlde.shootPlayer(socket.id, data);
   }
-
-  /*   private doMovePlayer(socket: Socket, data: any) {
-    GameService.getInstance().movePlayer(socket.id, data.direction);
-  } 
-
-  private doPlayerAction(socket: Socket, data: any) {
-    GameService.getInstance().playerAction(socket.id, data.action);
-  } */
 }
