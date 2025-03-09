@@ -42,27 +42,27 @@ Asegurate de tener descargado [node](https://nodejs.org/es/download)
   adecuadas.
 
 ### 2. Comunicación Cliente-Servidor con WebSockets
-  • Configuración del servidor para manejar conexiones de clientes vía WebSockets.
-  • Envío y recepción de mensajes de manera eficiente entre cliente y servidor.
-  • Sincronización en tiempo real del estado del juego en todos los clientes
+- Configuración del servidor para manejar conexiones de clientes vía WebSockets.
+- Envío y recepción de mensajes de manera eficiente entre cliente y servidor.
+- Sincronización en tiempo real del estado del juego en todos los clientes
   conectados.
-  • Manejo de desconexiones y reconexiones de jugadores sin afectar la partida.
+- Manejo de desconexiones y reconexiones de jugadores sin afectar la partida.
 
 ### 3. Implementación del Cliente y Eventos del Juego
-  • Representación visual dinámica del tablero y los jugadores según datos del servidor.
-  • Implementación de eventos de juego: desplazamiento, rotación y disparo.
-  • Diseño de una interfaz intuitiva para la interacción del jugador.
-  • (5 pts) Adaptabilidad del cliente a posibles rediseños o mejoras futuras.
+- Representación visual dinámica del tablero y los jugadores según datos del servidor.
+- Implementación de eventos de juego: desplazamiento, rotación y disparo.
+- Diseño de una interfaz intuitiva para la interacción del jugador.
+- (5 pts) Adaptabilidad del cliente a posibles rediseños o mejoras futuras.
 
 ### 4. Gestión de Salas y Control de Juego
-  • Implementación de salas para gestionar partidas independientes.
-  • Control centralizado del estado del juego en el servidor.
-  • Compartición eficiente de datos del mapa entre todos los clientes.
-  • Manejo de finalización de partidas y asignación de ganadores.
+- Implementación de salas para gestionar partidas independientes.
+- Control centralizado del estado del juego en el servidor.
+- Compartición eficiente de datos del mapa entre todos los clientes.
+- Manejo de finalización de partidas y asignación de ganadores.
 
 ### 5. Uso de Buenas Prácticas de Programación y Patrones de Diseño 
-  • Uso adecuado de clases, objetos JSON y patrones de diseño.
-  • Código modular y bien estructurado que facilite la escalabilidad.
+- Uso adecuado de clases, objetos JSON y patrones de diseño.
+- Código modular y bien estructurado que facilite la escalabilidad.
 
 ## Personalizacion
 ```
