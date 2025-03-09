@@ -64,6 +64,20 @@ Asegurate de tener descargado [node](https://nodejs.org/es/download)
 - Uso adecuado de clases, objetos JSON y patrones de diseño.
 - Código modular y bien estructurado que facilite la escalabilidad.
 
+## 6.-Nivel Avanzado: Uso de framework (**PHASER**)
+- Implementacion de animaciones y escenas
+- Uso audios e interactividad con el juego
+
+
+## Tableros con difenentes tamaños:
+[imagen1](1.PNG)
+
+[imagen2](2.PNG)
+
+## HTTPS:
+[imagen3](3.PNG)
+
+
 ## Personalizacion
 ```
 Tamagochi Cabron/
