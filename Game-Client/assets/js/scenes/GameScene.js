@@ -124,18 +124,6 @@ export default class GameScene extends Phaser.Scene {
     const zoom = Math.min(zoomX, zoomY);
 
     this.cameras.main.setBounds(0, 0, boardWidth, boardHeight);
-    if (width < height) {
-      this.cameras.main.setPosition(
-        (viewPortWidth - cellSize * height) * -1,
-        0
-      );
-    } else {
-      this.cameras.main.setPosition(
-        0,
-        (viewPortHeight - cellSize * width) * -0.5
-      );
-    }
-
     this.cameras.main.setZoom(zoom);
   }
 
